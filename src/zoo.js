@@ -45,14 +45,14 @@ export default class Zoo {
                 //přidám na zvířete listener
                 tlacitka.forEach(tlacitko => {
                     tlacitko.addEventListener("click", (e) => {
-                        this.animalClick(e);
+                        this.animalClick(e.target);
                     });
                 });
     }
 
-    animalClick(e){
-        let id = e.target.dataset.id;
-        
+    animalClick(element){
+        let prvek = element.closest("[data-id]");
+        let id = prvek.dataset.id;
         this.getAnimal(id);
     }
 
@@ -67,5 +67,49 @@ export default class Zoo {
 
     showAnimal(data){
         console.log(data);
+        document.querySelector("#nazev").textContent = data.nazev;
+        document.querySelector("#latinsky").textContent = data.nazevLatinsky;
+        document.querySelector("#popis").textContent = data.popis;
+        document.querySelector("#domovina").textContent = data.domovina;
+        document.querySelector("#biotop").textContent = data.biotop;
+        document.querySelector("#potrava").textContent = data.potrava;
+        document.querySelector("#velikost").textContent = data.velikost;
+        document.querySelector(".detail__foto").src = "images/" + data.foto;
+        document.querySelector(".detail__foto").alt = data.nazev;
+
+        data.zoo.forEach(zoo => {this.getZoo(zoo)});
+
+        let pole = [];
+        data.zoo.forEach(zoo => { 
+            pole.push(fetch(API_BASE + "zoo/" + zoo));
+        });
+    
+        Promise.all(pole)
+            .then(responses => {
+                let poleJson = [];
+                responses.forEach(response => {
+                    poleJson.push(response.json());
+                })
+    
+                Promise.all(poleJson)
+                    .then(zoos => {
+                        console.table(zoos);
+                    })
+            })
+        
     }
+
+    getZoo(id){
+        fetch(API_BASE + 'zoo/' + id)
+            .then(response => response.json())
+            .then(data => {
+                this.showZoo(data);
+            })
+    }
+
+    showZoo(data){
+        console.log(data.jmeno);
+    }
+
+   
 }
